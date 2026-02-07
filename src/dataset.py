@@ -170,15 +170,15 @@ def get_fundus_transforms(mode: str = "train") -> A.Compose:
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
             A.RandomRotate90(p=0.5),
-            A.ShiftScaleRotate(
-                shift_limit=0.1,
-                scale_limit=0.15,
-                rotate_limit=30,
-                border_mode=cv2.BORDER_CONSTANT,
+            A.Affine(
+                translate_percent={"x": (-0.1, 0.1), "y": (-0.1, 0.1)},
+                scale=(0.85, 1.15),
+                rotate=(-30, 30),
+                mode=cv2.BORDER_CONSTANT,
                 p=0.5
             ),
             A.OneOf([
-                A.GaussNoise(var_limit=(10, 50)),
+                A.GaussNoise(std_range=(0.02, 0.1)),  # 新版本 API
                 A.GaussianBlur(blur_limit=(3, 5)),
             ], p=0.3),
             A.ColorJitter(
@@ -209,14 +209,14 @@ def get_oct_transforms(mode: str = "train") -> A.Compose:
     if mode == "train" and cfg.AUGMENTATION:
         return A.Compose([
             A.HorizontalFlip(p=0.5),
-            A.ShiftScaleRotate(
-                shift_limit=0.05,
-                scale_limit=0.1,
-                rotate_limit=10,
-                border_mode=cv2.BORDER_CONSTANT,
+            A.Affine(
+                translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
+                scale=(0.9, 1.1),
+                rotate=(-10, 10),
+                mode=cv2.BORDER_CONSTANT,
                 p=0.3
             ),
-            A.GaussNoise(var_limit=(5, 30), p=0.2),
+            A.GaussNoise(std_range=(0.01, 0.05), p=0.2),  # 新版本 API
             A.Normalize(mean=[0.5], std=[0.5]),
             ToTensorV2(),
         ])

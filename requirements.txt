@@ -1,13 +1,13 @@
-torch>=2.0.0
-torchvision>=0.15.0
-timm>=0.9.0
-efficientnet_pytorch>=0.7.1
-pandas>=2.0.0
-numpy>=1.24.0
-opencv-python>=4.8.0
-albumentations>=1.3.0
-scikit-learn>=1.3.0
-tqdm>=4.65.0
-openpyxl>=3.1.0
-tensorboard>=2.13.0
-einops>=0.6.0
+torch
+tqdm
+timm
+tensorboard
+pandas==2.3
+opencv-python
+# torchvision
+# efficientnet_pytorch
+# numpy
+albumentations
+scikit-learn
+openpyxl
+einops

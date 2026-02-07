@@ -10,7 +10,7 @@ class Config:
     """训练配置类"""
     
     # ========================= 数据路径 =========================
-    DATA_ROOT = Path(r"d:\code\Gamma_Challenge\Glaucoma_grading\Glaucoma_grading")
+    DATA_ROOT = Path("./Glaucoma_grading/Glaucoma_grading")
     TRAIN_DIR = DATA_ROOT / "Training"
     VAL_DIR = DATA_ROOT / "Validation"
     TEST_DIR = DATA_ROOT / "Testing"
@@ -26,7 +26,12 @@ class Config:
     FUNDUS_BACKBONE = "efficientnet_b4"  # 可选: efficientnet_b4, convnext_base, swin_base
     FUNDUS_PRETRAINED = True
     FUNDUS_IMG_SIZE = 512
-    
+       # NOTE: 本地预训练模型目录（从 HuggingFace 下载的目录）
+    # 设为 None 则从网络下载，设为路径则从本地加载
+    # 例如: Path(r"d:\models\efficientnet_b4.ra2_in1k") 
+    #      或 Path(r"/work/home/shiyan_dong/models/efficientnet_b4.ra2_in1k")
+    FUNDUS_LOCAL_MODEL_DIR = Path("model")  # 修改为你的本地路径
+     
     # OCT分支 (3D/2.5D)
     OCT_MODE = "2.5d"  # 可选: "3d", "2.5d"
     OCT_NUM_SLICES = 64  # 选取的切片数量
@@ -72,7 +77,7 @@ class Config:
     DEVICE = "cuda"
     
     # 保存路径
-    OUTPUT_DIR = Path(r"d:\code\Gamma_Challenge\outputs")
+    OUTPUT_DIR = Path("./outputs")
     CHECKPOINT_DIR = OUTPUT_DIR / "checkpoints"
     LOG_DIR = OUTPUT_DIR / "logs"
     
