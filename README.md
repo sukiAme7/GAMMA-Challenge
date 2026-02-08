@@ -34,3 +34,19 @@ python src/train.py
 ```bash
 python src/inference.py --checkpoint best_model.pth --evaluate 
 ```
+## 实验结果 (Test Results)
+
+| 指标 (Metric) | 数值 (Value) |
+| :--- | :--- |
+| **Kappa** | 0.8117 |
+| **Accuracy** | 0.7500 |
+| **F1 Macro** | 0.6617 |
+| **AUC** | 0.8928 |
+
+### 各类别准确率 (Per-class Accuracy)
+
+| 类别 (Class) | 准确率 (Accuracy) | 说明 |
+| :--- | :--- | :--- |
+| **Class 0** | 96.08% | Normal (正常) |
+| **Class 1** | 32.00% | Early (早期) |
+| **Class 2** | 75.00% | Mid/Advanced (中晚期) |
