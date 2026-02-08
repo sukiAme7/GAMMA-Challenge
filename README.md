@@ -40,9 +40,10 @@ python src/inference.py --checkpoint best_model.pth --evaluate
 | :--- | :--- |
 | **Kappa** | 0.8117 |
 | **Accuracy** | 0.7500 |
+| **Precision** | 0.6735 |
+| **Recall** | 0.6769 |
 | **F1 Macro** | 0.6617 |
 | **AUC** | 0.8928 |
-
 ### 各类别准确率 (Per-class Accuracy)
 
 | 类别 (Class) | 准确率 (Accuracy) | 说明 |

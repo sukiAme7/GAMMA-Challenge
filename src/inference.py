@@ -160,6 +160,8 @@ def main(args):
         print(f"  Kappa: {metrics['kappa']:.4f}")
         print(f"  Accuracy: {metrics['accuracy']:.4f}")
         print(f"  F1 Macro: {metrics['f1_macro']:.4f}")
+        print(f"  Precision Macro: {metrics['precision_macro']:.4f}")
+        print(f"  Recall Macro: {metrics['recall_macro']:.4f}")
         print(f"  AUC: {metrics['auc']:.4f}")
         print(f"  Per-class Acc: {metrics['per_class_acc']}")
     

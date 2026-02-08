@@ -1,12 +1,13 @@
 """
 GAMMA Challenge - 工具函数
+包含损失函数、评估指标、混合增强等
 """
 import random
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score, roc_auc_score
+from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score, roc_auc_score, precision_score, recall_score
 from pathlib import Path
 
 import sys
@@ -15,7 +16,7 @@ from config import cfg
 
 
 def set_seed(seed: int = None):
-    """设置随机种子"""
+    """设置随机种子以确保可复现"""
     seed = seed or cfg.SEED
     random.seed(seed)
     np.random.seed(seed)
@@ -155,10 +156,20 @@ class MetricCalculator:
         except ValueError:
             auc = 0.0
         
+        # Precision and Recall (macro)
+        
+        # Precision (macro)
+        precision = precision_score(labels, preds, average='macro', zero_division=0)
+        
+        # Recall (macro)
+        recall = recall_score(labels, preds, average='macro', zero_division=0)
+        
         return {
             'kappa': kappa,
             'accuracy': acc,
             'f1_macro': f1,
+            'precision_macro': precision,
+            'recall_macro': recall,
             'auc': auc,
             'per_class_acc': per_class_acc,
         }
