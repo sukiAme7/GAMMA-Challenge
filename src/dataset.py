@@ -47,12 +47,32 @@ class GammaDataset(Dataset):
         
         # 加载标签
         self.df = pd.read_excel(label_file)
-        # NOTE: 假设第一列是样本ID，第二列是标签
-        self.df.columns = ["sample_id", "label"] if len(self.df.columns) == 2 else self.df.columns
         
-        # 获取样本ID列表
-        self.sample_ids = self.df.iloc[:, 0].astype(str).str.zfill(4).tolist()
-        self.labels = self.df.iloc[:, 1].tolist()
+        # 处理One-Hot编码
+        # 假设Excel列名为: [data, non, early, mid_advanced]
+        # 或者类似的结构，关键是后三列代表类别
+        if len(self.df.columns) >= 4:
+            # 获取后三列作为One-Hot标签
+            # 确保列名是预期的，或者直接按位置取
+            # 这里为了稳健，尝试按列名查找，找不到则按位置
+            expected_cols = ['non', 'early', 'mid_advanced']
+            if all(col in self.df.columns for col in expected_cols):
+                labels_onehot = self.df[expected_cols].values
+            else:
+                # 假设第2,3,4列是标签 (第1列是ID)
+                labels_onehot = self.df.iloc[:, 1:4].values
+            
+            # 转换为类别索引 (0, 1, 2)
+            self.labels = np.argmax(labels_onehot, axis=1).tolist()
+            
+            # 样本ID
+            self.sample_ids = self.df.iloc[:, 0].astype(str).str.zfill(4).tolist()
+        else:
+            # 兼容旧的两列格式 (ID, Label)
+            print("[WARN] 未检测到One-Hot编码列，尝试使用两列格式")
+            self.df.columns = ["sample_id", "label"] if len(self.df.columns) == 2 else self.df.columns
+            self.sample_ids = self.df.iloc[:, 0].astype(str).str.zfill(4).tolist()
+            self.labels = self.df.iloc[:, 1].tolist()
         
         # 验证数据完整性
         self._validate_data()
@@ -260,7 +280,7 @@ def get_dataloader(
 
 
 if __name__ == "__main__":
-    # 测试数据加载
+    # test
     train_loader = get_dataloader(
         data_dir=cfg.TRAIN_DIR,
         label_file=cfg.TRAIN_LABEL_FILE,

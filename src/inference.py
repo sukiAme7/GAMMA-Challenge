@@ -126,14 +126,14 @@ def evaluate_on_test(
 
 def main(args):
     """主推理函数"""
-    device = cfg.DEVICE if torch.cuda.is_available() else "cpu"
+    device = cfg.DEVICE 
     print(f"[INFO] Using device: {device}")
     
     # 加载模型
     print(f"[INFO] Loading model from: {args.checkpoint}")
     model = build_model(pretrained=False)
     
-    checkpoint = torch.load(args.checkpoint, map_location=device)
+    checkpoint = torch.load(args.checkpoint, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model_state_dict"])
     model = model.to(device)
     model.eval()
@@ -152,7 +152,7 @@ def main(args):
     )
     print(f"[INFO] Test samples: {len(test_loader.dataset)}")
     
-    # 评估（如果测试集有标签）
+    # 评估
     if args.evaluate:
         print("\n[INFO] Evaluating on test set...")
         metrics = evaluate_on_test(model, test_loader, device, tta=args.tta)
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=4,
+        default=2,
         help="Batch size for inference"
     )
     parser.add_argument(

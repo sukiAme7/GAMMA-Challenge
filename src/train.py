@@ -152,7 +152,7 @@ def main(args):
     cfg.setup_dirs()
     
     # 设备
-    device = cfg.DEVICE if torch.cuda.is_available() else "cpu"
+    device = cfg.DEVICE 
     print(f"[INFO] Using device: {device}")
     
     # 数据加载

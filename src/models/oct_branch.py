@@ -5,6 +5,7 @@ GAMMA Challenge - OCT (3D/2.5D) 分支
 import torch
 import torch.nn as nn
 import timm
+import os
 from pathlib import Path
 
 import sys
@@ -39,14 +40,54 @@ class OCTBranch2D(nn.Module):
         self.num_slices = num_slices
         self.aggregation = aggregation
         
-        # 使用timm创建backbone (修改输入通道为1)
-        self.backbone = timm.create_model(
-            backbone_name,
-            pretrained=pretrained,
-            in_chans=1,  # 灰度图
-            num_classes=0,
-            global_pool="avg"
-        )
+        # 使用timm创建backbone
+        # 优先尝试从本地加载
+        local_model_dir = getattr(cfg, 'FUNDUS_LOCAL_MODEL_DIR', None)
+        
+        if pretrained and local_model_dir and Path(local_model_dir).exists():
+            print(f"[INFO] OCTBranch2D: 从本地目录加载预训练模型: {local_model_dir}")
+            self.backbone = timm.create_model(
+                backbone_name,
+                pretrained=False,
+                in_chans=1,
+                num_classes=0,
+                global_pool="avg"
+            )
+            
+            # 加载本地权重并适配单通道
+            weights_file = self._find_weights_file(local_model_dir)
+            if weights_file:
+                state_dict = self._load_weights(weights_file)
+                # 过滤分类头
+                state_dict = {k: v for k, v in state_dict.items() 
+                             if not k.startswith('classifier') and not k.startswith('fc')}
+                
+                # 适配单通道 (3->1)
+                self._adapt_input_conv(state_dict)
+                
+                self.backbone.load_state_dict(state_dict, strict=False)
+                print(f"[INFO] OCTBranch2D: 成功加载本地权重并适配单通道: {weights_file}")
+            else:
+                print(f"[WARN] OCTBranch2D: 本地未找到权重文件，使用随机初始化")
+        else:
+            # 尝试从网络加载
+            try:
+                self.backbone = timm.create_model(
+                    backbone_name,
+                    pretrained=pretrained,
+                    in_chans=1,
+                    num_classes=0,
+                    global_pool="avg"
+                )
+            except Exception as e:
+                print(f"[WARN] OCTBranch2D: 无法下载预训练权重 ({e})，使用随机初始化")
+                self.backbone = timm.create_model(
+                    backbone_name,
+                    pretrained=False,
+                    in_chans=1,
+                    num_classes=0,
+                    global_pool="avg"
+                )
         
         self.feature_dim = self.backbone.num_features
         
@@ -60,6 +101,51 @@ class OCTBranch2D(nn.Module):
         
         print(f"[INFO] OCTBranch2D: {backbone_name}, slices={num_slices}, agg={aggregation}, feature_dim={self.feature_dim}")
     
+    def _find_weights_file(self, model_dir: str) -> str:
+        """在模型目录中查找权重文件"""
+        model_dir = Path(model_dir)
+        candidates = ["model.safetensors", "pytorch_model.bin", "model.bin"]
+        
+        for filename in candidates:
+            filepath = model_dir / filename
+            if filepath.exists():
+                return str(filepath)
+        
+        snapshots_dir = model_dir / "snapshots"
+        if snapshots_dir.exists():
+            for snapshot in snapshots_dir.iterdir():
+                if snapshot.is_dir():
+                    for filename in candidates:
+                        filepath = snapshot / filename
+                        if filepath.exists():
+                            return str(filepath)
+        return None
+    
+    def _load_weights(self, weights_file: str) -> dict:
+        """加载权重文件"""
+        if weights_file.endswith('.safetensors'):
+            try:
+                from safetensors.torch import load_file
+                return load_file(weights_file)
+            except ImportError:
+                print("[WARN] 未安装 safetensors")
+                return {}
+        else:
+            return torch.load(weights_file, map_location="cpu", weights_only=True)
+
+    def _adapt_input_conv(self, state_dict: dict):
+        """适配输入层卷积通道数 (3->1)"""
+        # EfficientNet series
+        conv_names = ['conv_stem.weight', 'stem.0.weight']
+        
+        for name in conv_names:
+            if name in state_dict:
+                w = state_dict[name]
+                if w.shape[1] == 3:  # (Out, 3, K, K)
+                    print(f"[INFO] Converting {name} from 3 channels to 1 channel (summing)")
+                    state_dict[name] = w.sum(dim=1, keepdim=True)
+                break
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
@@ -160,12 +246,12 @@ class OCTBranch3D(nn.Module):
         return x
 
 
-def get_oct_branch(mode: str = None) -> nn.Module:
+def get_oct_branch(mode: str = None, pretrained: bool = True) -> nn.Module:
     """工厂函数：根据配置返回OCT分支"""
     mode = mode or cfg.OCT_MODE
     
     if mode == "2.5d":
-        return OCTBranch2D()
+        return OCTBranch2D(pretrained=pretrained)
     elif mode == "3d":
         return OCTBranch3D()
     else:

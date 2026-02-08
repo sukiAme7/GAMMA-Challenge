@@ -32,5 +32,5 @@ python src/train.py
 
 ## 推理
 ```bash
-python src/inference.py --checkpoint best_model.pth
+python src/inference.py --checkpoint best_model.pth --evaluate 
 ```

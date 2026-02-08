@@ -1,6 +1,5 @@
 """
 GAMMA Challenge - 工具函数
-包含损失函数、评估指标、混合增强等
 """
 import random
 import numpy as np
@@ -16,7 +15,7 @@ from config import cfg
 
 
 def set_seed(seed: int = None):
-    """设置随机种子以确保可复现"""
+    """设置随机种子"""
     seed = seed or cfg.SEED
     random.seed(seed)
     np.random.seed(seed)
@@ -124,7 +123,7 @@ class MetricCalculator:
         
         self.preds.extend(preds.cpu().numpy())
         self.labels.extend(labels.cpu().numpy())
-        self.probs.extend(probs.cpu().numpy())
+        self.probs.extend(probs.detach().cpu().numpy())
     
     def compute(self) -> dict:
         """计算所有指标"""

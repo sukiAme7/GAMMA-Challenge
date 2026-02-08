@@ -39,7 +39,7 @@ class GammaNet(nn.Module):
         )
         
         # OCT分支
-        self.oct_branch = get_oct_branch(mode=oct_mode)
+        self.oct_branch = get_oct_branch(mode=oct_mode, pretrained=pretrained)
         
         # 融合模块
         self.fusion = get_fusion_module(

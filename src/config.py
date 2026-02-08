@@ -28,8 +28,6 @@ class Config:
     FUNDUS_IMG_SIZE = 512
        # NOTE: 本地预训练模型目录（从 HuggingFace 下载的目录）
     # 设为 None 则从网络下载，设为路径则从本地加载
-    # 例如: Path(r"d:\models\efficientnet_b4.ra2_in1k") 
-    #      或 Path(r"/work/home/shiyan_dong/models/efficientnet_b4.ra2_in1k")
     FUNDUS_LOCAL_MODEL_DIR = Path("model")  # 修改为你的本地路径
      
     # OCT分支 (3D/2.5D)
@@ -39,7 +37,7 @@ class Config:
     OCT_BACKBONE = "efficientnet_b4"  # 2.5D模式下使用的backbone
     
     # 融合模块
-    FUSION_TYPE = "attention"  # 可选: "concat", "attention"
+    FUSION_TYPE = "attention"  
     FUSION_HIDDEN_DIM = 512
     FUSION_DROPOUT = 0.5
     
@@ -63,7 +61,7 @@ class Config:
     LABEL_SMOOTHING = 0.1
     
     # 类别权重 (处理不平衡)
-    CLASS_WEIGHTS = [1.0, 2.0, 2.0]  # 根据实际分布调整
+    CLASS_WEIGHTS = [1.0, 1.0, 1.0]
     
     # ========================= 数据增强 =========================
     AUGMENTATION = True
@@ -73,7 +71,7 @@ class Config:
     
     # ========================= 其他 =========================
     SEED = 42
-    NUM_WORKERS = 4
+    NUM_WORKERS = 8
     DEVICE = "cuda"
     
     # 保存路径
